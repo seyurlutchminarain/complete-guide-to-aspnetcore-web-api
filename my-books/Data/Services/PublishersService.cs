@@ -35,5 +35,20 @@ namespace my_books.Data.Services
 
             _context.SaveChanges();
         }
+
+        public PublisherWithBooksAndAuthorsVM GetPublisherData(int publisherId)
+        {
+            var _publisherData = _context.Publishers.Where(n => n.id == publisherId).Select(n => new PublisherWithBooksAndAuthorsVM() // Look for specific publisher Id
+            {                                                                                               // Then Create PublisherWithBooksAndAuthors object using this id
+                Name = n.Name, // inherit publisher name
+                BookAuthors = n.Books.Select(n => new BookAuthorVM() // create new BookAuthor object
+                { 
+                    BookName =  n.Title, // inherit book title
+                    Authors = n.Book_Authors.Select(n => n.Author.FullName).ToList() // return list of others
+                }).ToList() // return whole list of objects
+            }).FirstOrDefault();
+
+            return _publisherData;
+        }
     }
 }

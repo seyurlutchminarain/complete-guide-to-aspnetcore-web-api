@@ -49,7 +49,24 @@ namespace my_books.Data.Services
 
         public List<Book> GetAllBooks() => _context.Books.ToList(); // Store all the books as a list.
 
-        public Book GetBookById(int bookID) => _context.Books.FirstOrDefault(n => n.Id == bookID); // retrieve a single book from DB
+        public BookWithAuthorsVM GetBookById(int bookID) // retrieve a single book from DB
+        {
+            var _bookWithAuthors = _context.Books.Where(n => n.Id == bookID).Select(book => new BookWithAuthorsVM()
+            {
+                Title = book.Title,
+                Description = book.Description,
+                IsRead = book.IsRead,
+                DateRead = book.IsRead ? book.DateRead.Value : null, // if book is read then use DateRead else use NULL
+                Rate = book.IsRead ? book.Rate.Value : null,
+                Genre = book.Genre,
+                CoverUrl = book.CoverUrl,
+                PublisherName = book.Publisher.Name,
+                AuthorNames = book.Book_Authors.Select(n => n.Author.FullName).ToList() // Getting the author names using the relationship created previously 
+
+            }).FirstOrDefault(); // We use FirstOrDefault in case the book cant be found, in this case we will return NULL
+
+            return _bookWithAuthors;
+        }
 
         public Book UpdateBookById(int bookId, BookVM book)
         {
